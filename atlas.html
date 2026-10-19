@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>千人小镇 · 平面图集</title>
+  <link rel="stylesheet" href="./atlas.css?v=20261006-rosters3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22%23285742%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2240%22%20fill%3D%22%23fff8da%22%3E%E5%8D%83%3C%2Ftext%3E%3C%2Fsvg%3E">
+</head>
+<body>
+  <header class="atlas-header">
+    <span class="brand">千人小镇 <em>/</em> 平面图集</span>
+    <span class="header-note">悬停查看编号 · 点击建筑联动右侧三维观测</span>
+    <div class="header-controls">
+      <span class="header-note" title="小镇编号，站内展示为只读">编号 <span id="seed-input" aria-label="小镇编号"></span></span>
+      <label class="viewer-toggle" title="开关右侧三维观测；关闭时卸载内嵌画面并释放渲染开销"><input id="viewer-toggle" type="checkbox" checked> 三维观测</label>
+      <button id="resident-names-open" class="ghost-button" type="button">居民花名册 <span id="resident-names-count">系统</span></button>
+      <a class="ghost-button" href="./resident-character-admin.html" target="_blank" rel="noopener">三维形象馆 ↗</a>
+      <a id="atlas-main-view" class="ghost-button" href="./index.html" target="_blank" rel="noopener">打开主视图 ↗</a>
+    </div>
+  </header>
+
+  <main class="atlas-body">
+    <section class="plan-pane">
+      <div class="plan-toolbar">
+        <div class="search-wrap">
+          <input id="atlas-search" type="search" placeholder="搜索编号或名称，如 L041 / 南大街 / t-one / 摊…" autocomplete="off">
+          <div id="search-results" class="search-results" hidden></div>
+        </div>
+        <div class="layer-chips" id="layer-chips"></div>
+      </div>
+      <div class="plan-canvas" id="plan-canvas">
+        <svg id="plan" xmlns="http://www.w3.org/2000/svg" viewBox="-212 -278 424 580" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="plan-tooltip" class="plan-tooltip" hidden></div>
+
+        <div id="sel-badge" class="corner-badge sel-badge" hidden>
+          <div class="sel-head">
+            <span class="eyebrow">SELECTED</span>
+            <span id="sel-name" class="badge-name">未选中</span>
+            <span id="sel-code" class="sel-code">—</span>
+            <button id="sel-close" class="badge-close" title="关闭" aria-label="关闭选中信息">×</button>
+          </div>
+          <dl id="sel-props" class="sel-props"></dl>
+          <div id="sel-live" class="sel-live" hidden></div>
+        </div>
+
+        <div class="corner-badge state-badge" id="state-badge">
+          <div class="badge-grip" id="state-grip" title="拖动移动此面板"><span class="grip-dots">⠿</span>时段与形态</div>
+          <div class="state-row"><span class="state-label">时段</span>
+            <button class="state-button" data-minute="420">晨 07:00</button>
+            <button class="state-button" data-minute="720">午 12:00</button>
+            <button class="state-button" data-minute="1050">傍 17:30</button>
+            <button class="state-button" data-minute="1140">夜 19:00</button>
+            <button class="state-button" data-minute="120">深夜 02:00</button>
+          </div>
+          <div class="state-row"><span class="state-label">形态</span>
+            <button class="state-button" id="btn-building">建造中</button>
+            <button class="state-button" id="btn-complete">建成</button>
+            <button class="state-button" id="btn-overview">复位全景</button>
+          </div>
+        </div>
+
+        <div id="plan-loading" class="plan-loading">正在构建小镇与三维观测…</div>
+      </div>
+    </section>
+
+    <div class="pane-splitter" id="pane-splitter" role="separator" aria-orientation="vertical"
+      aria-label="拖拽调整右侧面板宽度" title="拖拽调整宽度 · 双击复位"></div>
+
+    <aside class="inspect-pane">
+      <div class="viewer-card">
+        <div class="viewer-head"><span class="eyebrow">3D OBSERVATION</span><span id="viewer-state" class="viewer-state">默认视角</span></div>
+        <div class="viewer-frame-wrap">
+          <iframe id="viewer-frame" title="小镇三维观测" scrolling="no"></iframe>
+          <div class="viewer-hint">在画面内拖拽旋转 · 滚轮缩放 · WASD 平移</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="resident-names-dialog" class="names-dialog" aria-labelledby="names-title">
+    <header class="names-heading">
+      <div><span class="eyebrow">小镇居民</span><h2 id="names-title">千人小镇 · 居民花名册</h2></div>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <a class="ghost-button" href="./resident-character-admin.html" target="_blank" rel="noopener">三维形象馆 ↗</a>
+        <button id="names-close" type="button" class="ghost-button" aria-label="关闭居民花名册">关闭 ×</button>
+      </div>
+    </header>
+    <p class="names-intro">当前名单下每位居民的姓名、职业与住处；名单随小镇编号固定，此处为只读展示。</p>
+    <p id="names-status" class="names-status" role="status" aria-live="polite"></p>
+    <div id="names-list" class="names-library" role="group" aria-label="名单视图，点击切换查看"></div>
+    <div class="names-columns">
+      <section class="names-preview-pane" aria-labelledby="names-preview-title">
+        <h3 id="names-preview-title">居民名单</h3>
+        <p id="names-summary" class="names-help">正在载入居民…</p>
+        <label class="names-search-label" for="names-search">搜索姓名或居民编号</label>
+        <input id="names-search" type="search" placeholder="姓名 / preschooler-001" autocomplete="off">
+        <div class="names-table-wrap"><table class="names-table"><thead><tr><th>姓名</th><th>居民编号</th><th>职业</th><th>住宅</th></tr></thead><tbody id="names-rows"></tbody></table></div>
+        <p id="names-empty" class="names-help" hidden>暂无居民数据。</p>
+      </section>
+    </div>
+  </dialog>
+
+  <script src="./city-random.js"></script>
+  <script src="./city-model.js"></script>
+  <script src="./city-facilities.js"></script>
+  <script src="./city-places.js"></script>
+  <script src="./city-housing-plan.js"></script>
+  <script src="./city-waterfront.js"></script>
+  <script src="./city-layout.js"></script>
+  <script src="./city-life-ext/daily-clock.js"></script>
+  <script src="./city-life-ext/resident-name.js?v=20261006-rosters3"></script>
+  <script src="./city-life-ext/resident-schedule.js"></script>
+  <script src="./city-life-ext/resident.js"></script>
+  <script src="./city-life-ext/resident-plan.js"></script>
+  <script src="./city-life-ext/resident-state.js"></script>
+  <script src="./city-life-ext/plan-snapshot.js"></script>
+  <script src="./city-life-ext/lighting.js"></script>
+  <script src="./atlas.js?v=20261006-rosters3"></script>
+</body>
+</html>

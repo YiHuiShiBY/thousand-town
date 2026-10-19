@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c181e">
+<title>居民三维档案馆 · 千人小镇</title><link rel="stylesheet" href="./resident-character-admin.css"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22%23285742%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2240%22%20fill%3D%22%23fff8da%22%3E%E5%8D%83%3C%2Ftext%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="./resident-character-admin.html"><span class="brand-mark">千</span><span><small>A THOUSAND LIVES / CHARACTER ARCHIVE</small><b>千人小镇 · 居民三维档案馆</b></span></a><a id="back-city" class="button subtle" href="./index.html">返回小镇 ↗</a></header>
+<div class="workspace">
+<aside class="catalog" aria-label="居民分类目录">
+<div class="catalog-heading"><h2>居民与身份</h2><span id="population" class="badge">1000</span></div>
+<label class="search"><span>⌕</span><input id="catalog-search" type="search" placeholder="搜索姓名、编号、职业…" aria-label="搜索居民姓名编号或职业"></label>
+<div class="quick-groups" aria-label="快捷分类"><button type="button" data-roles="">全部</button><button type="button" data-roles="student-p,student-m,student-u">学生</button><button type="button" data-roles="medical-doc,medical-nurse">医护</button><button type="button" data-roles="retiree,senior">老人</button></div>
+<div class="filter-heading"><h3>年龄</h3><button id="clear-filters" class="text-button" type="button">清除筛选</button></div>
+<label class="field"><span class="sr-only">快捷年龄段</span><select id="age-band" aria-label="快捷年龄段"><option value="">所有年龄 · 1–90 岁</option><option value="1,5">1–5 岁</option><option value="6,12">6–12 岁</option><option value="13,17">13–17 岁</option><option value="18,22">18–22 岁</option><option value="23,35">23–35 岁</option><option value="36,55">36–55 岁</option><option value="56,70">56–70 岁</option><option value="71,90">71–90 岁</option></select></label>
+<div class="age-range"><label>从 <input id="min-age" type="number" min="1" max="90" value="1" aria-label="最小年龄"></label><span>—</span><label>到 <input id="max-age" type="number" min="1" max="90" value="90" aria-label="最大年龄"></label></div>
+<label class="field gender-field"><span>性别</span><select id="gender" aria-label="性别筛选"><option value="">全部</option><option value="M">男</option><option value="F">女</option></select></label>
+<div class="directory-summary"><span id="directory-summary">20 个身份分组</span><span>按真实名册</span></div>
+<div id="group-list" class="group-list" aria-label="职业与身份分组"></div>
+<p class="catalog-note"><span>●</span> 年龄与职业分别筛选。<br>人数来自当前居民名册。</p>
+</aside>
+<main class="main-panel">
+<div class="collection-heading"><p class="eyebrow">RESIDENT COLLECTION</p><h1 id="group-title">工人 / 蓝领</h1><p id="group-description">查看居民资料，比较同源基础人形。</p><div class="collection-count"><b id="match-count">—</b><span id="match-total">位居民</span></div></div>
+<div class="toolbar" aria-label="模型观察工具">
+<div class="button-group views" aria-label="观察角度"><button type="button" data-view="3d" aria-pressed="true">3D</button><button type="button" data-view="front" aria-pressed="false">正面</button><button type="button" data-view="side" aria-pressed="false">侧面</button><button type="button" data-view="back" aria-pressed="false">背面</button><button type="button" data-view="top" aria-pressed="false">俯视</button></div>
+<label class="toggle"><input id="linked" type="checkbox" checked>同步镜头</label>
+<div class="button-group"><button type="button" data-count="2" aria-pressed="false">2 格</button><button type="button" data-count="4" aria-pressed="true">4 格</button></div>
+<label class="toggle"><input id="wireframe" type="checkbox">线框</label><label class="toggle"><input id="clay" type="checkbox">白模</label>
+<label class="toggle"><input id="auto-rotate" type="checkbox">自动旋转</label><label class="toggle"><input id="play" type="checkbox">播放动作</label>
+<button type="button" id="reset-camera">重置</button><button type="button" id="capture">截图 ↧</button>
+</div>
+<div class="pose-toolbar"><label>动作示例 <select id="pose" aria-label="动作示例"><option value="walker">步行</option><option value="standing">站立</option><option value="commuter">背包通勤</option><option value="jogger">慢跑</option><option value="vendor">摊主招呼</option></select></label><label>光线 <select id="light-mode" aria-label="观察光线"><option value="day">明亮棚拍</option><option value="night">夜间观察</option></select></label><span id="model-stage">基础造型与职业低模 · 按分类查看</span></div>
+<div class="board-caption"><span id="compare-caption">4 个模型并列 · 镜头已同步</span><span>拖动旋转 · 滚轮缩放 · 右键平移</span><button type="button" id="exit-focus" hidden>← 返回并排</button></div>
+<div id="comparison-board" class="comparison-board" aria-label="居民三维并排观察窗口"><div id="cards" class="cards"></div><p id="empty-state" class="empty-state" hidden>没有符合条件的居民。<br><small>可调整年龄范围或职业筛选。</small></p></div>
+<div class="pagination"><span id="page-range">—</span><div><button id="previous-page" type="button" aria-label="上一页">←</button><span id="page-label">1 / 1</span><button id="next-page" type="button" aria-label="下一页">→</button></div></div>
+<p class="scope-note">每个模型按该居民的名册记录实时生成：年龄决定身高与头身比，编号决定个体差异。街面行人仍是统计代理，与这里的逐人造型不是同一个人。</p>
+</main>
+<aside class="inspector" aria-label="居民资料"><p class="eyebrow">INSPECTION</p><h2>当前居民</h2><div id="inspector-content"></div>
+
+<p class="inspector-note">20 个职业各有专属造型，按居民的真实性别与年龄实时生成；翻页与筛选都能看到同一职业内的个体差异。</p></aside>
+</div>
+<p id="notification" class="notification" role="status" hidden></p>
+<script src="./vendor/three.min.js"></script><script src="./city-random.js"></script><script src="./city-life-ext/resident-name.js"></script><script src="./city-life-ext/daily-clock.js"></script><script src="./city-life-ext/resident.js"></script><script src="./city-materials.js"></script><script src="./city-scene.js"></script><script src="./resident-character-kit.js"></script><script src="./resident-character-models.js"></script><script src="./resident-character-catalog.js"></script><script src="./resident-school-admin-model.js"></script><script src="./resident-officer-model.js"></script><script src="./resident-preschooler-model.js"></script><script src="./resident-medical-doc-model.js"></script><script src="./resident-medical-nurse-model.js"></script><script src="./resident-patient-model.js"></script><script src="./resident-retiree-model.js"></script><script src="./resident-senior-model.js"></script><script src="./resident-office-model.js"></script><script src="./resident-worker-model.js"></script><script src="./resident-student-p-model.js"></script><script src="./resident-student-m-model.js"></script><script src="./resident-student-u-model.js"></script><script src="./resident-teacher-model.js"></script><script src="./resident-clerk-model.js"></script><script src="./resident-shopkeeper-model.js"></script><script src="./resident-driver-model.js"></script><script src="./resident-sanitation-model.js"></script><script src="./resident-hosp-admin-model.js"></script><script src="./resident-unemployed-model.js"></script><script src="./resident-character-viewer.js"></script><script src="./resident-character-admin.js"></script>
+</body></html>

@@ -1,0 +1,9 @@
+第三方组件与素材
+
+Three.js r180、Reflector、GLTFLoader：MIT；https://github.com/mrdoob/three.js/tree/r180
+p5.js 1.7.0：LGPL 2.1；本目录 p5-1.7.0.tgz 是官方原始分发包，含可读库源码 lib/p5.js 和许可证。
+本包运行库仅添加本地说明注释与末尾换行，其余代码与官方 npm 包一致。
+获取地址：https://registry.npmjs.org/p5/-/p5-1.7.0.tgz
+上游源码：https://github.com/processing/p5.js/tree/v1.7.0
+银河图片：ESO / S. Brunier；详见银河图片署名.txt。
+以上资料用于保留第三方署名和许可，无需打开或安装即可使用小镇。

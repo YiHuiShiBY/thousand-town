@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f7fa">
+  <meta name="description" content="千人小镇：在温暖的现代社区中，观察居民一天的起居、上学与河岸生活。">
+  <title>千人小镇 · 看见日常</title>
+  <link rel="stylesheet" href="./style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22%23285742%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2240%22%20fill%3D%22%23fff8da%22%3E%E5%8D%83%3C%2Ftext%3E%3C%2Fsvg%3E">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回小镇">
+      <svg class="brand-mark" width="25" height="25" viewBox="0 0 25 25" fill="none" aria-hidden="true"><path d="m12.5 2 10 5.8v9.4l-10 5.8-10-5.8V7.8L12.5 2Z" stroke="currentColor" stroke-width="1.2"/><path d="m2.5 7.8 10 5.7 10-5.7M12.5 13.5V23M7.5 5l10 5.7v9.4" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span>天降筑城 <span class="brand-separator">/</span> <span class="brand-subtitle">V4 · 千人小镇</span></span>
+    </a>
+    <nav class="version-nav" aria-label="小镇工具"><a class="back-link back-site" href="../../" target="_top" title="回到 仪绘士 · 画境长廊">↩ 返回作品集</a><a class="back-link" href="./atlas.html">平面图集</a><a class="back-link" href="./drone-show/gallery.html">无人机图库</a></nav>
+  </header>
+  <main class="workspace">
+    <aside class="controls" aria-label="城市营造参数">
+      <div class="introduction">
+        <p class="eyebrow">A TOWN / A THOUSAND LIVES</p>
+        <h1>小镇里，<br>日子正发生。</h1>
+        <p class="intro-copy">从校门的早晨，到河岸的晚饭。<br>走近一栋楼，看看谁在这里。</p>
+        <p class="town-population"><span><b id="resident-count">1000</b> 位居民</span><span><b id="street-count">—</b> 人在途</span></p>
+        <p class="life-summary" aria-label="画面活动规模"><span><b id="vehicle-count">—</b> 辆车</span><span>画面人物 <b id="pedestrian-count">—</b></span></p>
+        <p class="hint" id="transit-status" aria-live="off">公交与出租车：出站 · 运营 · 回站整备</p>
+      </div>
+      <section class="town-inspector" aria-label="观察小镇">
+        <div class="town-observations" role="group" aria-label="生活观察视角">
+          <button type="button" data-observe="neighborhood">街区全景</button><button type="button" data-observe="h-terrace">住宅</button><button type="button" data-observe="c-secondary">校门</button><button type="button" data-observe="c-night-market">河岸</button><button type="button" data-observe="c-hospital">医院</button><button type="button" data-observe="c-civic">市民中心</button>
+        </div>
+        <label class="sr-only" for="town-building">选择观察的建筑</label><select id="town-building"></select>
+        <div class="building-heading"><h2 id="building-name">退台公寓</h2><span id="building-status"></span></div>
+        <p class="building-present"><b id="building-count">—</b><span>人此刻在这里</span></p>
+        <p id="building-activities"></p><p id="building-note"></p>
+        <div class="resident-tabs" role="group" aria-label="居民名单范围"><button type="button" id="residents-present" aria-pressed="true" class="is-active">此刻在这里</button><button type="button" id="residents-home" aria-pressed="false">本楼住户</button></div>
+        <div id="resident-list" class="resident-list" aria-label="居民名单"></div>
+        <div id="resident-detail" class="resident-detail" hidden></div>
+      </section>
+      <section class="blender-preview" aria-labelledby="blender-heading">
+        <h2 id="blender-heading">街区建筑 · 观察细节</h2>
+        <div class="check-row"><label for="blender-toggle">精细建筑</label><input id="blender-toggle" type="checkbox" checked disabled></div>
+        <p class="blender-hint">竖向格栅、石材横带与绿色露台，四栋办公楼各有轮廓。</p>
+        <div class="check-row"><label for="housing-toggle">社区住宅</label><input id="housing-toggle" type="checkbox" checked></div>
+        <div class="check-row"><label for="housing-blender-toggle">住宅精细模型</label><input id="housing-blender-toggle" type="checkbox" checked disabled></div>
+        <p class="blender-hint" id="housing-blender-status">正在准备住宅建筑细节</p>
+        <p class="blender-hint">阳台、院落与退台露台，四种居住尺度。</p>
+        <div class="housing-actions"><label class="sr-only" for="housing-type">住宅类型</label><select id="housing-type"><option value="courtyard">庭院住宅</option><option value="slab">花园板楼</option><option value="terrace">退台公寓</option><option value="point">双塔住区</option></select><button id="focus-housing" class="view-button" type="button">近看住宅</button></div>
+        <div class="check-row"><label for="playground-toggle">试验操场</label><input id="playground-toggle" type="checkbox" checked></div>
+        <p class="blender-hint">跑道慢跑、球场传球。可关闭操场对比。</p>
+        <div class="facility-controls" role="group" aria-label="近看城市设施">
+          <button class="view-button" id="focus-mall" type="button">商场</button>
+          <button class="view-button" id="focus-hospital" type="button">医院</button>
+          <button class="view-button" id="focus-secondary" type="button">中学部</button>
+          <button class="view-button" id="focus-playground" type="button">操场</button>
+          <button class="view-button" id="focus-amusement" type="button">游乐场</button>
+          <button class="view-button" id="focus-waterfront" type="button">步行街</button>
+          <button class="view-button" id="focus-station" type="button">车站</button>
+          <button class="view-button" id="focus-plaza" type="button">广场</button>
+          <button class="view-button" id="focus-primary" type="button">小学部</button>
+          <button class="view-button" id="focus-workshop" type="button">轻工坊</button>
+          <button class="view-button" id="focus-university" type="button">大学</button>
+          <button class="view-button" id="focus-market" type="button">批发市场</button>
+          <button class="view-button" id="focus-library" type="button">图书馆</button>
+          <button class="view-button" id="focus-annex-mall" type="button">小商业体</button>
+          <button class="view-button" id="focus-depot" type="button">物流场站</button>
+        </div>
+        <div class="blender-actions">
+          <button id="blender-focus" class="button button-outline" type="button" disabled>近看地标塔楼</button>
+          <span id="blender-status" role="status">模型准备中</span>
+        </div>
+      </section>
+      <section class="control-section seed-section" aria-labelledby="seed-heading">
+        <div class="section-heading"><h2 id="seed-heading">城市编号</h2><span class="section-number" aria-hidden="true">01</span></div>
+        <label class="sr-only" for="seed-input">城市生成编号</label>
+        <div class="seed-field">
+          <button id="seed-prev" class="seed-step" type="button" aria-label="上一个城市编号">−</button>
+          <span id="seed-input" aria-label="城市编号">20260818</span>
+          <button id="seed-next" class="seed-step" type="button" aria-label="下一个城市编号">+</button>
+        </div>
+        <button id="seed-random" class="button button-primary" type="button"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5h2.5c3 0 5.5 10 8.5 10h3M3 15h2.5c1.1 0 2.1-1.4 3.1-3M11.4 8c.9-1.7 1.7-3 2.6-3h3M14 2l3 3-3 3m0 4 3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>发现另一座城</button>
+      </section>
+      <section class="control-section" aria-labelledby="shape-heading">
+        <div class="section-heading"><h2 id="shape-heading">城市轮廓</h2><span class="section-number" aria-hidden="true">02</span></div>
+        <div class="range-control">
+          <div class="field-heading"><label for="density">街区密度</label><output id="density-value" for="density">80%</output></div>
+          <input id="density" type="range" min="0.55" max="1" step="0.05" value="0.8">
+          <div class="range-hints" aria-hidden="true"><span>疏朗</span><span>紧凑</span></div>
+        </div>
+        <div class="range-control">
+          <div class="field-heading"><label for="skyline">天际线高度</label><output id="skyline-value" for="skyline">1.0×</output></div>
+          <input id="skyline" type="range" min="0.7" max="1.3" step="0.1" value="1">
+          <div class="range-hints" aria-hidden="true"><span>舒展</span><span>挺拔</span></div>
+        </div>
+      </section>
+      <section class="control-section" aria-labelledby="motion-heading">
+        <div class="section-heading"><h2 id="motion-heading">营造节奏</h2><span class="section-number" aria-hidden="true">03</span></div>
+        <div class="range-control speed-control">
+          <div class="field-heading"><label for="speed">落成速度</label><output id="speed-value" for="speed">1.0×</output></div>
+          <input id="speed" type="range" min="0.4" max="2.5" step="0.1" value="1">
+        </div>
+        <div class="check-row"><label for="loop-toggle">循环营造 · 落成停留 60 秒</label><input id="loop-toggle" type="checkbox"></div>
+        <div class="check-row"><label for="auto-orbit">自动环绕</label><input id="auto-orbit" type="checkbox"></div>
+      </section>
+      <section class="light-control" aria-labelledby="dream-light-label">
+        <div class="field-heading"><label id="dream-light-label" for="dream-light">日光柔度</label><output id="dream-light-value" for="dream-light">70%</output></div>
+        <input id="dream-light" type="range" min="0" max="1" step="0.05" value="0.7">
+        <div class="range-hints" aria-hidden="true"><span>清晰日照</span><span>柔和天光</span></div>
+      </section>
+      <details class="material-details">
+        <summary><span>材质与色彩</span><span class="details-plus" aria-hidden="true">+</span></summary>
+        <div class="material-fields">
+          <div class="color-field"><label for="stone-color">金属立面</label><input id="stone-color" type="color" value="#e6eef3"></div>
+          <div class="color-field"><label for="glass-color">冰青玻璃</label><input id="glass-color" type="color" value="#63a8bb"></div>
+          <div class="color-field"><label for="ground-color">地面基座</label><input id="ground-color" type="color" value="#ccd8e1"></div>
+        </div>
+      </details>
+      <div class="sidebar-actions">
+        <button id="save-btn" class="button button-outline" type="button"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>保存此刻</button>
+        <button id="reset-btn" class="text-button" type="button">还原参数</button>
+      </div>
+    </aside>
+    <section class="scene-panel" aria-label="城市模型预览">
+      <div class="scene-header">
+        <div class="scene-title"><span class="status-dot" aria-hidden="true"></span><span>社区日常 · V4</span><span class="scene-divider" aria-hidden="true">/</span><span id="phase-name" role="status">准备营造</span></div>
+        <div class="view-controls" role="group" aria-label="选择观察视角">
+          <button id="view-home" class="view-button is-active" type="button" aria-pressed="true">全景</button>
+          <button id="view-top" class="view-button" type="button" aria-pressed="false">俯瞰</button>
+          <button id="view-front" class="view-button" type="button" aria-pressed="false">低角度</button>
+          <span id="drone-library" class="drone-library" hidden><a class="view-button" href="./drone-show/gallery.html">表演图库</a><select id="drone-pattern" aria-label="无人机表演图案"></select><button id="drone-replay" class="view-button" type="button" hidden>重新升起</button></span>
+          <button id="view-solar" class="view-button" type="button" aria-pressed="false" hidden>太阳系</button>
+          <select id="sky-view" class="view-button" aria-label="天空观景"><option value="">天空观景</option><option value="sunrise">云海日出</option><option value="sunset">云海日落</option><option value="moon">月夜</option></select>
+          <button id="view-airship" class="view-button" type="button" aria-pressed="false" title="跟随发光广告飞艇，按全景返回">近看飞艇</button>
+          <button id="layout-toggle" class="view-button" type="button" aria-expanded="false" aria-controls="layout-editor">调整地块</button>
+          <button id="fullscreen-btn" class="view-button fullscreen-button" type="button" aria-pressed="false" title="全屏播放，Esc 退出">全屏播放</button>
+          <button id="ui-toggle" class="view-button" type="button" aria-pressed="false" title="隐藏顶部与底部操作条，腾出画面">隐藏界面</button>
+        </div>
+      </div>
+      <div class="model-frame">
+        <div id="stage" aria-label="可拖拽旋转和滚轮缩放的三维城市模型">
+          <div id="loading" role="status"><span class="loading-mark" aria-hidden="true"></span><span>正在铺开城市图纸…</span></div>
+        </div>
+        <div id="keys-hint" class="keys-hint" aria-label="镜头操作说明">
+          <div class="keys-hint-head">
+            <span>⌨ 镜头操作</span>
+            <button id="keys-hint-toggle" type="button" aria-expanded="true" title="隐藏操作说明">隐藏 ✕</button>
+          </div>
+          <div class="keys-hint-mode" role="group" aria-label="操作模式">
+            <button type="button" class="mode-chip" data-mode="orbit" aria-pressed="true">环绕</button>
+            <button type="button" class="mode-chip" data-mode="fps" aria-pressed="false">键鼠</button>
+            <button type="button" class="mode-chip" data-mode="moba" aria-pressed="false">轮盘</button>
+          </div>
+          <div class="keys-hint-body" data-mode-body="orbit">
+            <dl>
+              <div><dt>W / S</dt><dd>前进 · 后退</dd></div>
+              <div><dt>A / D</dt><dd>左移 · 右移</dd></div>
+              <div><dt>Q / E</dt><dd>上升 · 下降</dd></div>
+              <div><dt>J / L</dt><dd>左转 · 右转</dd></div>
+              <div><dt>I / K</dt><dd>抬头 · 低头</dd></div>
+              <div><dt>X / Z</dt><dd>放大 · 缩小</dd></div>
+              <div><dt>Shift</dt><dd>加速移动</dd></div>
+              <div><dt>方向键</dt><dd>代替 W A S D</dd></div>
+              <div><dt>空格</dt><dd>暂停 · 继续</dd></div>
+              <div><dt>R / 0</dt><dd>回全景 · 重置</dd></div>
+              <div><dt>单指拖动</dt><dd>旋转视角</dd></div>
+              <div><dt>双指捏合</dt><dd>缩放画面</dd></div>
+              <div><dt>轻点建筑</dt><dd>查看住户</dd></div>
+            </dl>
+          </div>
+          <div class="keys-hint-body" data-mode-body="fps" hidden>
+            <dl>
+              <div><dt>点击画面</dt><dd>锁定鼠标</dd></div>
+              <div><dt>鼠标移动</dt><dd>转视角</dd></div>
+              <div><dt>W / S</dt><dd>前进 · 后退</dd></div>
+              <div><dt>A / D</dt><dd>左移 · 右移</dd></div>
+              <div><dt>Q / E</dt><dd>上升 · 下降</dd></div>
+              <div><dt>滚轮</dt><dd>缩放</dd></div>
+              <div><dt>Shift</dt><dd>加速移动</dd></div>
+              <div><dt>Esc</dt><dd>释放鼠标</dd></div>
+            </dl>
+          </div>
+          <div class="keys-hint-body" data-mode-body="moba" hidden>
+            <dl>
+              <div><dt>左下摇杆</dt><dd>移动</dd></div>
+              <div><dt>滑动画布</dt><dd>转向</dd></div>
+              <div><dt>双指捏合</dt><dd>缩放</dd></div>
+              <div><dt>轻点建筑</dt><dd>查看住户</dd></div>
+            </dl>
+          </div>
+        </div>
+        <button id="keys-hint-open" type="button" hidden aria-label="展开镜头操作说明">⌨ 操作</button>
+        <div id="joystick" class="joystick" hidden aria-label="移动轮盘">
+          <div class="joy-base"><div class="joy-knob" id="joy-knob"></div></div>
+        </div>
+        <div id="fps-hint" class="fps-hint" hidden>键鼠模式：WASD 移动 · Q/E 升降 · 鼠标转视角 · 滚轮缩放 · Esc 释放鼠标</div>
+        <div class="frame-top-left frame-note" aria-hidden="true"><span class="drawing-cross">+</span> CITY STUDY <span class="note-slash">/</span> <span id="seed-label">20260818</span></div>
+        <div class="frame-bottom-left frame-note"><span><b id="build-count">—</b> 层已落成</span><span><b id="tower-count">—</b> 组建筑</span></div>
+        <div class="frame-bottom-right frame-note" aria-hidden="true"><span id="north-mark" class="north-mark">↑</span> N</div>
+        <section id="layout-editor" class="layout-editor" aria-labelledby="layout-heading" hidden>
+          <div class="layout-heading"><div><p class="eyebrow">CITY / YOUR PLAN</p><h2 id="layout-heading">把日常，放在喜欢的位置。</h2></div><button id="layout-close" type="button" aria-label="关闭地块调整">×</button></div>
+          <label for="layout-facility">01 · 选择要移动的设施</label>
+          <select id="layout-facility">
+            <option value="hospital">医院</option><option value="mall">商场</option><option value="secondary">中学部</option><option value="playground">操场</option><option value="amusement">游乐场</option><option value="station">车站</option><option value="plaza">广场</option>
+            <option value="primary">小学部</option><option value="workshop">轻工坊</option><option value="university">大学</option><option value="market">批发市场</option><option value="library">图书馆</option><option value="annex-mall">小商业体</option><option value="depot">物流场站</option>
+          </select>
+          <p class="layout-step">02 · 点击格子，交换位置</p>
+          <div class="layout-compass" aria-hidden="true"><span>↑ 北（第 1 行）</span><span>西岸 · 运河 · 东岸</span></div>
+          <div id="layout-grid" class="layout-grid" role="group" aria-label="城市地块布局，四列六行共 24 格；A B 为西岸，C D 为东岸"></div>
+          <p id="layout-status" class="layout-status" role="status" aria-live="polite">选择目标格子，整块建筑与绿化一起交换。</p>
+          <div class="layout-actions"><button id="layout-undo" class="button button-outline" type="button" disabled>撤销上一步</button><button id="layout-reset" class="text-button" type="button" disabled>恢复默认布局</button></div>
+          <p class="layout-note">布局随网址保留，刷新后继续。车站可放在两侧外缘；步行街沿河设置。网址里现在是 24 个格子编号，V2 那批 16 个编号的分享链接会回落到默认布局。</p>
+        </section>
+      </div>
+      <div class="playback-bar">
+        <div class="playback-buttons">
+          <button id="pause-btn" class="button button-play" type="button">暂停营造</button>
+          <button id="replay-btn" class="replay-button" type="button" aria-label="从头营造" title="从头营造"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 6a7 7 0 1 1-1 7M4 2v4h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div class="timeline-control"><label class="sr-only" for="timeline">营造进度</label><input id="timeline" type="range" min="0" max="1" step="0.001" value="0.52"><span id="progress-label" class="progress-label">—</span></div>
+        <span id="time-label" class="time-label">—</span>
+        <!-- 双时钟（§5.1）：上面那条滑杆是 40 秒的营造时钟，下面这条是 24 小时的日常时钟。
+             两者都是绝对时间的纯函数，所以暂停、回放、导出一帧不差。 -->
+        <div class="day-control">
+          <button id="day-prev" class="view-button" type="button" aria-label="前一天">‹</button>
+          <output id="day-label" class="day-label" for="day-timeline">—</output>
+          <button id="day-next" class="view-button" type="button" aria-label="后一天">›</button>
+          <label class="sr-only" for="day-timeline">日内时间</label>
+          <input id="day-timeline" type="range" min="0" max="1439" step="1" value="540">
+          <span class="day-speed" role="group" aria-label="日常时钟速度">
+            <button id="day-speed-1" class="view-button is-active" type="button" aria-pressed="true">1×</button>
+            <button id="day-speed-2" class="view-button" type="button" aria-pressed="false">2×</button>
+            <button id="day-speed-4" class="view-button" type="button" aria-pressed="false">4×</button>
+          </span>
+        </div>
+      </div>
+      <div class="scene-footer"><p class="desktop-hint">W/S 前后 · A/D 左右 · Q/E 升降 <span>·</span> J/L 左右转 · I/K 上下看 <span>·</span> 拖拽转向 · 滚轮缩放</p><p class="touch-hint">单指转动模型 <span>·</span> 拖动进度探索营造过程</p><p class="footer-signature">从一层楼，到未来之城。</p></div>
+      <button id="show-ui" type="button" hidden aria-label="显示界面">界面 ×</button>
+    </section>
+  </main>
+  <script src="./vendor/p5.min.js"></script>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/gltf-loader.min.js"></script>
+  <script src="./vendor/reflector.min.js"></script>
+  <script src="./city-random.js"></script>
+  <script src="./city-festival.js"></script>
+  <script src="./city-model.js"></script>
+  <script src="./assets/resident-town-runtime.min.js"></script>
+  <script src="./city-light.js"></script>
+  <script src="./city-materials.js"></script>
+  <script src="./assets/blender-landscape.js"></script>
+  <script src="./assets/blender-amusement.js"></script>
+  <script src="./city-fireworks.js"></script>
+  <script src="./city-fountain.js"></script>
+  <script src="./assets/city-ground.runtime.min.js"></script>
+  <script src="./city-playground.js"></script>
+  <script src="./assets/blender-district.js"></script>
+  <script src="./city-district.js"></script>
+  <script src="./assets/blender-civic.js"></script>
+  <script src="./assets/blender-hospital-room.js"></script>
+  <script src="./city-facilities.js"></script>
+  <script src="./city-places.js"></script>
+  <script src="./city-housing-plan.js"></script>
+  <script src="./city-frontage.js"></script>
+  <script src="./city-layout.js"></script>
+  <script src="./assets/blender-housing.js"></script>
+  <script src="./city-housing.js"></script>
+  <script src="./city-housing-canvas.js"></script>
+  <script src="./city-waterfront.js"></script>
+  <script src="./city-transit-motion.js"></script>
+  <script src="./city-transit.js"></script>
+  <script src="./city-landmarks.js"></script>
+  <script src="./city-helipad.js"></script>
+  <script src="./city-airship.js"></script>
+  <!-- The app owns cached resident plans; renderers only consume the clock and lighting views. -->
+  <script src="./city-life-ext/daily-clock.js"></script>
+  <script src="./city-life-ext/resident-name.js?v=20261006-rosters3"></script>
+  <script src="./city-life-ext/resident-schedule.js"></script>
+  <script src="./city-life-ext/resident.js"></script>
+  <script src="./city-life-ext/resident-plan.js"></script>
+  <script src="./city-life-ext/resident-state.js"></script>
+  <script src="./city-life-ext/plan-snapshot.js"></script>
+  <script src="./city-life-ext/town-view.js"></script>
+  <script src="./city-life-ext/lighting.js"></script>
+  <script src="./drone-show/solar-system.js"></script>
+  <script src="./city-scene.js"></script>
+  <script src="./sketch.js?v=20261009-deco1"></script>
+
+
+</body>
+</html>

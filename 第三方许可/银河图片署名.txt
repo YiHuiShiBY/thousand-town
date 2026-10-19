@@ -1,0 +1,20 @@
+ESO Milky Way panorama — eso-milky-way.jpg
+
+Credit: ESO/S. Brunier
+Source image: https://www.eso.org/public/images/eso0932a/
+Original download: https://cdn.eso.org/images/large/eso0932a.jpg
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+License text: https://creativecommons.org/licenses/by/4.0/
+ESO copyright policy: https://www.eso.org/public/outreach/copyright/
+
+Local provenance: copied byte-for-byte from solar-observatory/solar-system/assets/eso-milky-way.jpg,
+as documented in that project's asset manifest and credits. The original image was not edited.
+Dimensions: 6000 x 3000
+Size: 8228817 bytes
+SHA-256: 60400c92c54b7c1bd12299c69e83b16e5b6256e7dabacc478c021758ecd28179
+
+Display treatment: city-materials.js directly samples the equirectangular panorama in a
+full-sphere shader. Source-pixel rank filtering reduces enlarged stars, partial desaturation
+keeps the dust silver gray, and the shared day/night clock fades it into the daytime sky.
+The original image remains unchanged. Filtering and orientation follow the local
+solar-observatory/solar-system/engine.js implementation; no solar-system runtime was copied.
