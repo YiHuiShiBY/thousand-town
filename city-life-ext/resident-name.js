@@ -197,6 +197,10 @@
       if (NAME_CONTROLS.test(value)) {
         error(line, '只接受单列姓名，姓名内不能包含制表符、换行或控制字符。'); return;
       }
+      // 防 XSS：姓名可能流入 atlas 的 innerHTML 拼接，入口处直接拒收 HTML 元字符
+      if (/[<>"'&]/.test(value)) {
+        error(line, '姓名内不能包含 < > " \' & 符号。'); return;
+      }
       var name = value.trim();
       if (!name) return;
       if (Array.from(name).length > 40) { error(line, '姓名不能超过 40 个 Unicode 字符。'); return; }
