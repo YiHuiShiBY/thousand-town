@@ -113,6 +113,19 @@ html[data-ready] .quality-hint { display: block; animation: quality-hint-life 13
 .quality-hint[hidden] { display: none !important; }
 body.ui-hidden .quality-hint { display: none; }
 @keyframes quality-hint-life { 0% { opacity: 0; } 4% { opacity: 1; } 93% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+/* 漂流瓶卡片：点开河上瓶子时的留言浮卡（正文一律 textContent 写入，见 sketch.js） */
+.bottle-card { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); z-index: 11; width: min(340px, calc(100% - 48px)); padding: 13px 16px 12px; border: 1px solid rgba(51, 86, 107, .38); border-radius: 12px; background: rgba(251, 253, 255, .94); backdrop-filter: blur(8px); box-shadow: 0 6px 24px rgba(20, 40, 55, .18); animation: bottle-card-in .35s ease; }
+.bottle-card[hidden] { display: none; }
+@keyframes bottle-card-in { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.bottle-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.bottle-card-head > span { font: 600 12px/1.2 inherit; color: var(--ink); letter-spacing: .04em; }
+.bottle-card-head button { border: none; background: transparent; color: #5b7585; font: 600 10px/1 inherit; letter-spacing: .06em; cursor: pointer; padding: 4px 2px; white-space: nowrap; }
+.bottle-card-head button:hover { color: var(--ink); }
+.bottle-card-body { margin: 9px 0 8px; font: 400 13px/1.75 inherit; color: #33475a; word-break: break-word; }
+.bottle-card-meta { display: flex; justify-content: space-between; gap: 10px; font: 400 9.5px/1.4 inherit; color: #8fa4b3; }
+.bottle-card-reply { margin: 9px 0 0; padding: 8px 10px; border-left: 2px solid #d8b77a; background: rgba(244, 227, 189, .28); border-radius: 0 6px 6px 0; font: 400 11.5px/1.7 inherit; color: #6b5b3e; }
+.bottle-reply-tag { display: block; font-weight: 600; font-size: 9.5px; letter-spacing: .08em; margin-bottom: 2px; color: #a2824d; }
+body.ui-hidden .bottle-card { display: none; }
 .model-frame { position: relative; display: flex; flex: 1 1 auto; min-width: 0; min-height: 580px; border: 1px solid var(--line); background: #e8eff4; }
 #stage { position: relative; width: 100%; min-width: 0; min-height: 580px; height: max(580px, calc(100svh - 219px)); overflow: hidden; }
 #stage canvas { display: block; max-width: 100%; touch-action: none; outline: none; }

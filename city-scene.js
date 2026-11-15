@@ -988,9 +988,11 @@ if(root.CityFacilities){facilities=CityFacilities.create(T,kit,city);scene.add(f
 if(root.CityHousing){housing=CityHousing.create(T,kit,city,settings);scene.add(housing.group);}
 // reserved bands and the drawn ring can never disagree.
 if(root.CityFrontage){frontage=CityFrontage.create(T,kit,city,city.frontage);scene.add(frontage.group);}
-for(const[name,api]of[['waterfront',root.CityWaterfront],['transit',root.CityTransit],['landmarks',root.CityLandmarks]]){
+for(const[name,api]of[['waterfront',root.CityWaterfront],['transit',root.CityTransit],['landmarks',root.CityLandmarks],['messages',root.CityMessages]]){
 if(api){const controller=api.create(T,kit,city);scene.add(controller.group);publicScenes.push({name,controller});}
 }
+// 重建会整体换掉 publicScenes，留言瓶要在重建后按缓存回填（见 setMessages）。
+applyBoardMessages();
 if(root.CityDistrict&&CityDistrict.getStatus().ready){
 prototypeBuilding=city.buildings.filter(b=>b.kind==='glass').sort((a,b)=>b.z-a.z||a.x-b.x)[0]||city.buildings[0]||null;
 if(prototypeBuilding){district=CityDistrict.create(T,city,settings);scene.add(district.group);facadeMaterials=district.getGlassMaterials();}
@@ -1018,6 +1020,29 @@ if(!solarShow)return;solarShow.setPattern(id);solarBounds=bounds.slice();
 const box=solarShow.getInfo().bounds;
 for(const x of[box.min[0],box.max[0]])for(const y of[box.min[1],box.max[1]])for(const z of[box.min[2],box.max[2]])solarBounds.push(new T.Vector3(x,y,z));
 lastSignature='';clearZoomAnchor();
+}
+let lastBoardMessages=null;
+function applyBoardMessages(){
+const m=publicScenes.find(s=>s.name==='messages');
+if(!m||!lastBoardMessages)return;
+if(ground&&ground.water){const p=new T.Vector3();ground.water.getWorldPosition(p);m.controller.setMessages(lastBoardMessages,p.y);}
+else m.controller.setMessages(lastBoardMessages,0);
+}
+function setMessages(list){
+lastBoardMessages=Array.isArray(list)?list.slice(0,64):null;
+applyBoardMessages();lastSignature='';
+}
+function pickMessage(px,py,w,h){
+const m=publicScenes.find(s=>s.name==='messages');
+if(!m||!m.controller)return null;
+pickRay.setFromCamera(new T.Vector2(px/w*2-1,1-py/h*2),camera);
+for(const hit of pickRay.intersectObject(m.controller.group,true)){
+let o=hit.object,visible=true;
+for(let i=o;i;i=i.parent){if(!i.visible){visible=false;break;}}
+if(!visible)continue;
+for(let i=o;i;i=i.parent){if(i.userData&&i.userData.messageId!=null)return i.userData.messageId;}
+}
+return null;
 }
 function setQuality(q){
 // three.js 运行时开关阴影需要重编译材质，一次性卡顿换回整档性能
@@ -1207,7 +1232,7 @@ context.drawImage(renderer.domElement,0,0,w,h);context.restore();lastSignature='
 }
     function dispose(){if(residentBatch){residentBatch.dispose();residentBatch=null;}if(solarShow)solarShow.dispose();if(streetLighting)streetLighting.dispose();if(nightShowcase)nightShowcase.dispose();scene.remove(visibleSky.mesh);visibleSky.dispose();releaseFacadeReflection();publicScenes.forEach(item=>item.controller.dispose());publicScenes=[];if(facilities)facilities.dispose();if(housing)housing.dispose();if(frontage)frontage.dispose();if(helipad)helipad.dispose();if(airship)airship.dispose();if(district)district.dispose();if(officeArchitecture)officeArchitecture.dispose();if(prototype){scene.remove(prototype.group);prototype.dispose();}if(ground)ground.dispose();releaseGroup(buildingRoot);releaseGroup(actorRoot);[box,sphere,cylinder,poolGeo,...ownedMaterials].forEach(o=>o.dispose());sun.shadow.dispose();kit.dispose();renderer.dispose();}
     function attach(stage,previous){renderer.domElement.setAttribute('aria-label',previous.getAttribute('aria-label'));renderer.domElement.setAttribute('role','img');renderer.domElement.style.touchAction='none';stage.replaceChild(renderer.domElement,previous);}
-return{rebuild,render,dispose,attach,scene,setDronePattern,setQuality,setEffectPreview,setWindowLight,setTownView,pickBuilding,projectBuilding,captureZoomAnchor,clearZoomAnchor,invalidate:()=>{lastSignature='';lastShadow=-1;lastReflection=-1;clearZoomAnchor();},getInfo:()=>({effects:effectPreviewInfo(),initialization:{ready:initialProgramsPrepared,reflectionPending:facadePending,reflectionFace:facadeJob?facadeJob.face:null},nightShowcase:nightShowcase?nightShowcase.getInfo():null,engine:'Three.js r'+T.REVISION,pixelRatio:renderer.getPixelRatio(),residents:residentBatch?residentBatch.getInfo():null,solarShow:solarShow?solarShow.getInfo():null,shadows:renderer.shadowMap.enabled,shadowMap:sun.shadow.mapSize.toArray(),shadowFrustum:[sun.shadow.camera.left,sun.shadow.camera.right,sun.shadow.camera.top,sun.shadow.camera.bottom],reflection:Boolean(ground&&ground.water),festival:ground?ground.getFestivalInfo():null,blender:district?{id:prototypeBuilding.id,enabled:settings.blenderModel!==false,scope:'district',buildings:city.buildings.filter(b=>!b.facility&&!b.housing).length}:prototype?{id:prototypeBuilding.id,enabled:settings.blenderModel!==false,scope:'sample',buildings:1}:null,district:district?district.getInfo():null,officeArchitecture:officeArchitecture?officeArchitecture.getInfo():null,facilities:facilities?facilities.getInfo():null,housing:housing?housing.getInfo():null,frontage:frontage?frontage.getInfo():null,helipad:helipad?helipad.getInfo():null,airship:airship?airship.getInfo():null,places:Object.fromEntries(publicScenes.map(item=>[item.name,item.controller.getInfo()])),parkSeating:ground?ground.group.userData.groundDetails.parkSeating:[],streetExtras:ground?{bins:ground.group.userData.groundDetails.bins,binAnchors:ground.group.userData.groundDetails.furniture.filter(f=>f.kind==='bin').map(f=>({x:f.x,z:f.z})),streetTrees:ground.group.userData.groundDetails.streetTrees,pedestrianBridges:ground.group.userData.groundDetails.pedestrianBridges,vendingAnchors:ground.group.userData.groundDetails.furniture.filter(f=>f.kind==='vending').map(f=>({x:f.x,z:f.z})),mailboxAnchors:ground.group.userData.groundDetails.furniture.filter(f=>f.kind==='mailbox').map(f=>({x:f.x,z:f.z})),busStops:(city.transitStops||[]).filter(s=>s.kind==='bus').map(s=>({x:s.x,z:s.z,shelter:s.shelter===true}))}:null,officeLights:officePanes.map(e=>({id:e.id,mapId:e.building.id,level:townView?.byBuilding[e.id]?.lightLevel||0,windows:e.panes.length,litWindows:e.litWindows})),windowLights:windowLights.map(item=>({id:item.wing.id,facility:item.wing.facility,panes:item.mesh.count,litWindows:item.litWindows,level:windowLevel(item.wing.id),lit:item.mesh.visible===true})),lighting:{...lightingInfo,gpuSpots:spotPasses.get(renderer)?.stats||null,activeCars,streetLamps:ground?ground.group.userData.groundDetails.lamps:0,streetLampAnchors:ground?ground.group.userData.groundDetails.lampAnchors:[]},calls:renderer.info.render.calls,triangles:renderer.info.render.triangles})};
+return{rebuild,render,dispose,attach,scene,setDronePattern,setQuality,setMessages,pickMessage,setEffectPreview,setWindowLight,setTownView,pickBuilding,projectBuilding,captureZoomAnchor,clearZoomAnchor,invalidate:()=>{lastSignature='';lastShadow=-1;lastReflection=-1;clearZoomAnchor();},getInfo:()=>({effects:effectPreviewInfo(),initialization:{ready:initialProgramsPrepared,reflectionPending:facadePending,reflectionFace:facadeJob?facadeJob.face:null},nightShowcase:nightShowcase?nightShowcase.getInfo():null,engine:'Three.js r'+T.REVISION,pixelRatio:renderer.getPixelRatio(),residents:residentBatch?residentBatch.getInfo():null,solarShow:solarShow?solarShow.getInfo():null,shadows:renderer.shadowMap.enabled,shadowMap:sun.shadow.mapSize.toArray(),shadowFrustum:[sun.shadow.camera.left,sun.shadow.camera.right,sun.shadow.camera.top,sun.shadow.camera.bottom],reflection:Boolean(ground&&ground.water),festival:ground?ground.getFestivalInfo():null,blender:district?{id:prototypeBuilding.id,enabled:settings.blenderModel!==false,scope:'district',buildings:city.buildings.filter(b=>!b.facility&&!b.housing).length}:prototype?{id:prototypeBuilding.id,enabled:settings.blenderModel!==false,scope:'sample',buildings:1}:null,district:district?district.getInfo():null,officeArchitecture:officeArchitecture?officeArchitecture.getInfo():null,facilities:facilities?facilities.getInfo():null,housing:housing?housing.getInfo():null,frontage:frontage?frontage.getInfo():null,helipad:helipad?helipad.getInfo():null,airship:airship?airship.getInfo():null,places:Object.fromEntries(publicScenes.map(item=>[item.name,item.controller.getInfo()])),parkSeating:ground?ground.group.userData.groundDetails.parkSeating:[],streetExtras:ground?{bins:ground.group.userData.groundDetails.bins,binAnchors:ground.group.userData.groundDetails.furniture.filter(f=>f.kind==='bin').map(f=>({x:f.x,z:f.z})),streetTrees:ground.group.userData.groundDetails.streetTrees,pedestrianBridges:ground.group.userData.groundDetails.pedestrianBridges,vendingAnchors:ground.group.userData.groundDetails.furniture.filter(f=>f.kind==='vending').map(f=>({x:f.x,z:f.z})),mailboxAnchors:ground.group.userData.groundDetails.furniture.filter(f=>f.kind==='mailbox').map(f=>({x:f.x,z:f.z})),busStops:(city.transitStops||[]).filter(s=>s.kind==='bus').map(s=>({x:s.x,z:s.z,shelter:s.shelter===true}))}:null,officeLights:officePanes.map(e=>({id:e.id,mapId:e.building.id,level:townView?.byBuilding[e.id]?.lightLevel||0,windows:e.panes.length,litWindows:e.litWindows})),windowLights:windowLights.map(item=>({id:item.wing.id,facility:item.wing.facility,panes:item.mesh.count,litWindows:item.litWindows,level:windowLevel(item.wing.id),lit:item.mesh.visible===true})),lighting:{...lightingInfo,gpuSpots:spotPasses.get(renderer)?.stats||null,activeCars,streetLamps:ground?ground.group.userData.groundDetails.lamps:0,streetLampAnchors:ground?ground.group.userData.groundDetails.lampAnchors:[]},calls:renderer.info.render.calls,triangles:renderer.info.render.triangles})};
 }
 root.CityScene={create,townAppearanceActors,personParts,createPersonPreview,buildSpotGrid,prepareGpuSpotRenderer,createStreetLighting,personPose,facadeMessagePlan,facadeScreenPlan,facadeScreenFrame,facadeMediaPlan,createNightShowcase,createInstanceAggregate,prepareGpuSpotLoop,prepareOpaqueShadow};
 if(typeof module==='object'&&module.exports)module.exports=root.CityScene;

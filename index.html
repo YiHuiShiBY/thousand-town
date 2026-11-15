@@ -192,6 +192,12 @@
           </div>
         </div>
         <button id="keys-hint-open" type="button" hidden aria-label="展开镜头操作说明">⌨ 操作</button>
+        <div id="bottle-card" class="bottle-card" role="dialog" aria-label="漂流瓶留言" hidden>
+          <div class="bottle-card-head"><span id="bottle-name"></span><button id="bottle-close" type="button" title="放回河流">放回河流 ✕</button></div>
+          <p id="bottle-body" class="bottle-card-body"></p>
+          <div class="bottle-card-meta"><span id="bottle-date"></span><span>仪绘士 · 画境长廊 留言板</span></div>
+          <p id="bottle-reply" class="bottle-card-reply" hidden><span class="bottle-reply-tag">站长回信</span><span id="bottle-reply-text"></span></p>
+        </div>
         <div id="joystick" class="joystick" hidden aria-label="移动轮盘">
           <div class="joy-base"><div class="joy-knob" id="joy-knob"></div></div>
         </div>
@@ -269,6 +275,7 @@
   <script src="./city-housing.js"></script>
   <script src="./city-housing-canvas.js"></script>
   <script src="./city-waterfront.js"></script>
+  <script src="./city-messages.js"></script>
   <script src="./city-transit-motion.js"></script>
   <script src="./city-transit.js"></script>
   <script src="./city-landmarks.js"></script>

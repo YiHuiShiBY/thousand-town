@@ -18,6 +18,11 @@
   let layout=CityLayout.normalize(new URLSearchParams(location.search).get('layout'));
   const layoutHistory=[];
   let layoutEditing=false;
+  // 留言板数据（漂流瓶层的信源）：拉取失败保持空数组，河面无瓶即可。
+  let boardMessages=[];
+  // 分钟是否被显式钉住（URL ?minute 或用户拨动时钟）；否则 refreshTown 里的
+  // syncMinuteURL 不写参数——默认跟随真实时刻的页面要保持分享链接干净。
+  let minutePinned=false;
 
 
 
@@ -101,7 +106,6 @@
 
   const FOCUS_BUTTONS=Object.keys(FACILITY_VIEWS);
 
-  const DAY_START_MINUTE=1140;
   const DOW_NAMES=['周一','周二','周三','周四','周五','周六','周日'];
   const DAY_TYPE_NAMES={weekday:'工作日',saturday:'周六',sunday:'周日'};
   const requestedMinute=new URLSearchParams(location.search).get('minute');
@@ -111,7 +115,8 @@
   const requestEmbed=new URLSearchParams(location.search).get('embed')==='1';
   if(requestEmbed&&document.body)document.body.classList.add('is-immersive','embed');
   const startDay=Number.isSafeInteger(requestedDay)&&requestedDay>0?requestedDay:1;
-  const startMinute=requestedMinute!==null&&/^\d{1,4}$/.test(requestedMinute)?Math.min(1439,Number(requestedMinute)):DAY_START_MINUTE;
+  // 无 ?minute 参数时跟随访客真实时刻：晚上推门进来就是夜镇的灯。
+  const startMinute=requestedMinute!==null&&/^\d{1,4}$/.test(requestedMinute)?(minutePinned=true,Math.min(1439,Number(requestedMinute))):new Date().getHours()*60+new Date().getMinutes();
   const state = {time:0,droneShowStart:0,paused:reducedMotion,loop:false,orbit:false,...VIEW_PRESETS.home,panX:0,panY:0,cameraX:0,cameraY:0,cameraZ:0,cameraYaw:0,cameraPitch:0,flyTarget:null,focusBuilding:false,focusFacility:null,
     daySeconds:((startDay-1)*1440+startMinute)*CityDailyClock.SECONDS_PER_SIM_MINUTE,observation:null};
   function dayClock(){
@@ -290,6 +295,7 @@
     return townView;
   }
   function setSimTime(next){
+    minutePinned=true;
     const current=dayClock(),day=Math.max(1,Math.floor(Number(next.day)||current.day));
     const minute=clamp(Number.isFinite(Number(next.minute))?Number(next.minute):current.minute,0,1439);
     state.daySeconds=((day-1)*1440+minute)*CityDailyClock.SECONDS_PER_SIM_MINUTE;
@@ -1662,6 +1668,19 @@
     }
     ctx.restore();
   }
+  // 漂流瓶卡片：留言是访客数据，一律 textContent 写入，绝不拼 HTML。
+  function openBottleCard(id){
+    const m=boardMessages.find(x=>String(x.id)===String(id));
+    const card=$('bottle-card');
+    if(!m||!card){if(card)card.hidden=true;return;}
+    $('bottle-name').textContent='漂流瓶 · 来自 '+(m.name||'路过的人');
+    $('bottle-body').textContent=m.body||'';
+    $('bottle-date').textContent=(m.ts||'').slice(0,10);
+    const reply=$('bottle-reply');
+    if(m.reply){reply.hidden=false;$('bottle-reply-text').textContent=m.reply;}else reply.hidden=true;
+    card.hidden=false;
+  }
+  function closeBottleCard(){const card=$('bottle-card');if(card)card.hidden=true;}
   function renderTo(context,w,h) {
     refreshTown();
     if(state.focusAirship){const ship=airshipState();if(ship)state.flyTarget={x:ship.x,y:ship.y,z:ship.z};}
@@ -1885,7 +1904,7 @@
   function syncMinuteURL(){
     const url=new URL(location.href);
     const minute=CityDailyClock.minuteOfDay(state.daySeconds);
-    if(minute===DAY_START_MINUTE)url.searchParams.delete('minute');else url.searchParams.set('minute',String(minute));
+    if(minutePinned)url.searchParams.set('minute',String(minute));else url.searchParams.delete('minute');
     const day=dayClock().day;if(day===1)url.searchParams.delete('day');else url.searchParams.set('day',String(day));
     try{history.replaceState(null,'',url.href);}catch(_){/* Local file browsers may disallow history updates. */}
   }
@@ -2191,6 +2210,7 @@
     $('quality-hint').hidden=false;
     $('quality-view').addEventListener('focus',()=>{$('quality-hint').hidden=true;},{once:true});
     $('quality-view').onchange=e=>{$('quality-hint').hidden=true;settings.quality=e.target.value;try{localStorage.setItem('town-quality',e.target.value)}catch{/* 隐私模式下静默 */}if(physicalScene)physicalScene.setQuality(e.target.value);};
+    $('bottle-close').onclick=()=>closeBottleCard();
     $('save-btn').onclick=exportPNG;
     $('timeline').addEventListener('input',()=>{setConstructionTime(Number($('timeline').value)*city.duration);pause(true);});
     // 日常时钟的滑杆**不暂停**画面：拖到 22:00 看到的就是 22:00 的镇子，松手继续走。
@@ -2280,7 +2300,10 @@
         return;
       }
       if(pointers.size>0)return;
-      if(e.type==='pointerup'&&dragging&&!moved&&physicalScene&&!layoutEditing){const rect=stage.getBoundingClientRect();const id=physicalScene.pickBuilding(e.clientX-rect.left,e.clientY-rect.top,rect.width,rect.height);if(id){selectedBuilding=id;selectedResident=null;residentMode='present';lastPanelKey='';updateUI(true);}}dragging=null;stage.classList.remove('is-dragging');
+      if(e.type==='pointerup'&&dragging&&!moved&&physicalScene&&!layoutEditing){const rect=stage.getBoundingClientRect();const px=e.clientX-rect.left,py=e.clientY-rect.top;
+      const mid=physicalScene.pickMessage?physicalScene.pickMessage(px,py,rect.width,rect.height):null;
+      if(mid)openBottleCard(mid);
+      else{closeBottleCard();const id=physicalScene.pickBuilding(px,py,rect.width,rect.height);if(id){selectedBuilding=id;selectedResident=null;residentMode='present';lastPanelKey='';updateUI(true);}}}dragging=null;stage.classList.remove('is-dragging');
     };
     stage.addEventListener('pointerup',release);stage.addEventListener('pointercancel',release);stage.addEventListener('lostpointercapture',release);
     stage.addEventListener('wheel',e=>{
@@ -2302,6 +2325,11 @@
       p.pixelDensity(settings.quality==='fast'?1:Math.min(window.devicePixelRatio||1,2));p.frameRate(60);
       try {physicalScene=CityScene.create(settings);if(settings.quality)physicalScene.setQuality(settings.quality);physicalScene.rebuild(city,life,town.residents);physicalScene.attach(stage,canvas.elt);refreshTown(true);}
       catch(error){if(physicalScene)physicalScene.dispose();physicalScene=null;console.warn('WebGL unavailable; using the local canvas renderer.',error);}
+      // 漂流瓶信源：只读公开接口，失败静默——小镇不因外部接口失联而失态。
+      // 本地联调可用 localStorage.town_board_api 覆盖接口地址（同主站 yhs_track_api 的惯例）。
+      let boardApi='https://api.yihuishi.com';
+      try{const override=localStorage.getItem('town_board_api');if(override)boardApi=override;}catch{/* 隐私模式下静默 */}
+      fetch(boardApi+'/api/board',{signal:AbortSignal.timeout(6000)}).then(r=>r.ok?r.json():Promise.reject(new Error('board http '+r.status))).then(d=>{if(Array.isArray(d.messages)){boardMessages=d.messages;if(physicalScene)physicalScene.setMessages(boardMessages);}}).catch(()=>{/* 接口不可达：河面无瓶 */});
       bindControls();updateUI(true);
       observer=new ResizeObserver(()=>{
         const w=Math.round(stage.clientWidth),h=Math.round(stage.clientHeight);
