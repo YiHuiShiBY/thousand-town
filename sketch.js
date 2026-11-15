@@ -101,7 +101,7 @@
 
   const FOCUS_BUTTONS=Object.keys(FACILITY_VIEWS);
 
-  const DAY_START_MINUTE=540;
+  const DAY_START_MINUTE=1140;
   const DOW_NAMES=['周一','周二','周三','周四','周五','周六','周日'];
   const DAY_TYPE_NAMES={weekday:'工作日',saturday:'周六',sunday:'周日'};
   const requestedMinute=new URLSearchParams(location.search).get('minute');
