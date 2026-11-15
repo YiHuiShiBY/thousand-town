@@ -2188,7 +2188,9 @@
     $('view-airship').onclick=focusAirship;
     $('sky-view').onchange=e=>chooseSkyView(e.target.value);
     $('quality-view').value=settings.quality||'balanced';
-    $('quality-view').onchange=e=>{settings.quality=e.target.value;try{localStorage.setItem('town-quality',e.target.value)}catch{/* 隐私模式下静默 */}if(physicalScene)physicalScene.setQuality(e.target.value);};
+    $('quality-hint').hidden=false;
+    $('quality-view').addEventListener('focus',()=>{$('quality-hint').hidden=true;},{once:true});
+    $('quality-view').onchange=e=>{$('quality-hint').hidden=true;settings.quality=e.target.value;try{localStorage.setItem('town-quality',e.target.value)}catch{/* 隐私模式下静默 */}if(physicalScene)physicalScene.setQuality(e.target.value);};
     $('save-btn').onclick=exportPNG;
     $('timeline').addEventListener('input',()=>{setConstructionTime(Number($('timeline').value)*city.duration);pause(true);});
     // 日常时钟的滑杆**不暂停**画面：拖到 22:00 看到的就是 22:00 的镇子，松手继续走。

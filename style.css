@@ -105,6 +105,14 @@ input[type="color"]::-webkit-color-swatch { border: 0; }
 .view-button { min-width: 46px; min-height: 26px; padding: 3px 8px; border-radius: 1px; color: var(--muted); font-size: 10px; }
 .view-button:hover { color: var(--ink); background: #e6f1f6; }
 .view-button.is-active, .view-button[aria-pressed="true"] { color: #086b88; background: #dbeef5; box-shadow: inset 0 -1px #9ec7d8; }
+/* 画质指引：场景就绪后浮现的气泡，自动淡出；碰到下拉即隐藏（见 sketch.js） */
+.quality-anchor { position: relative; display: inline-flex; }
+.quality-hint { position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 7px 11px; border: 1px solid rgba(51, 86, 107, .38); border-radius: 8px; background: rgba(251, 253, 255, .94); backdrop-filter: blur(6px); color: #33566b; font: 600 10px/1 inherit; letter-spacing: .04em; box-shadow: 0 3px 14px rgba(20, 40, 55, .16); pointer-events: none; z-index: 9; display: none; }
+.quality-hint::before { content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 8px; height: 8px; background: rgba(251, 253, 255, .94); border-left: 1px solid rgba(51, 86, 107, .38); border-top: 1px solid rgba(51, 86, 107, .38); }
+html[data-ready] .quality-hint { display: block; animation: quality-hint-life 13s ease forwards; }
+.quality-hint[hidden] { display: none !important; }
+body.ui-hidden .quality-hint { display: none; }
+@keyframes quality-hint-life { 0% { opacity: 0; } 4% { opacity: 1; } 93% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 .model-frame { position: relative; display: flex; flex: 1 1 auto; min-width: 0; min-height: 580px; border: 1px solid var(--line); background: #e8eff4; }
 #stage { position: relative; width: 100%; min-width: 0; min-height: 580px; height: max(580px, calc(100svh - 219px)); overflow: hidden; }
 #stage canvas { display: block; max-width: 100%; touch-action: none; outline: none; }
