@@ -13,6 +13,8 @@
   const settings = {...defaults,residentModels:new URLSearchParams(location.search).get('people')!=='legacy',solarShow:['solar','thousand'].includes(requestedShow),dronePattern:requestedShow==='thousand'?'thousand':'solar'};
   const requestedSeed = new URLSearchParams(location.search).get('seed');
   if(requestedSeed!==null&&/^\d{1,10}$/.test(requestedSeed)&&Number(requestedSeed)<=4294967295)settings.seed=Number(requestedSeed);
+  // 画质档位按设备记忆，不进 defaults：重置按钮不该动它（隐私模式下静默回落均衡档）
+  try{const savedQuality=localStorage.getItem('town-quality');if(savedQuality==='fast'||savedQuality==='balanced'||savedQuality==='high')settings.quality=savedQuality;}catch{}
   let layout=CityLayout.normalize(new URLSearchParams(location.search).get('layout'));
   const layoutHistory=[];
   let layoutEditing=false;
@@ -2185,6 +2187,8 @@
     $('pause-btn').onclick=()=>pause();
     $('view-airship').onclick=focusAirship;
     $('sky-view').onchange=e=>chooseSkyView(e.target.value);
+    $('quality-view').value=settings.quality||'balanced';
+    $('quality-view').onchange=e=>{settings.quality=e.target.value;try{localStorage.setItem('town-quality',e.target.value)}catch{/* 隐私模式下静默 */}if(physicalScene)physicalScene.setQuality(e.target.value);};
     $('save-btn').onclick=exportPNG;
     $('timeline').addEventListener('input',()=>{setConstructionTime(Number($('timeline').value)*city.duration);pause(true);});
     // 日常时钟的滑杆**不暂停**画面：拖到 22:00 看到的就是 22:00 的镇子，松手继续走。
@@ -2293,8 +2297,8 @@
       canvas.parent(stage);canvas.elt.setAttribute('aria-label','日光下的城市建筑模型，可拖拽旋转与滚轮缩放');
       canvas.elt.setAttribute('role','img');
       canvas.elt.style.touchAction='none';canvas.elt.style.display='block';
-      p.pixelDensity(Math.min(window.devicePixelRatio||1,2));p.frameRate(60);
-      try {physicalScene=CityScene.create(settings);physicalScene.rebuild(city,life,town.residents);physicalScene.attach(stage,canvas.elt);refreshTown(true);}
+      p.pixelDensity(settings.quality==='fast'?1:Math.min(window.devicePixelRatio||1,2));p.frameRate(60);
+      try {physicalScene=CityScene.create(settings);if(settings.quality)physicalScene.setQuality(settings.quality);physicalScene.rebuild(city,life,town.residents);physicalScene.attach(stage,canvas.elt);refreshTown(true);}
       catch(error){if(physicalScene)physicalScene.dispose();physicalScene=null;console.warn('WebGL unavailable; using the local canvas renderer.',error);}
       bindControls();updateUI(true);
       observer=new ResizeObserver(()=>{
